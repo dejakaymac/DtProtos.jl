@@ -7,7 +7,7 @@ using Logging
 Logging.configure(level=DEBUG)
 #Logging.configure(level=OFF)
 
-include("pdf.jl")
+include("pdfs.jl")
 include("ice.jl")
 
 

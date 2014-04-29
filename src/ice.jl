@@ -5,7 +5,7 @@ using PyPlot
 using Logging
 Logging.configure(level=DEBUG)
 #include("pdf.jl")
-using DtProtos.pdf
+using DtProtos.pdfs
 
 
 export normalise!, area, A, fromPdf, fromPdfControlPoints
@@ -65,17 +65,17 @@ end
 # does fromPDFControlPoints use InverseCumulative() much?
 # if so this is bad
 
-function fromPdf(pdf::SimplePdf)
+function fromPdf(dist::SimplePdf)
     println("From SimplePdf")
 end
 
-function fromPdf(pdf::GaussianPdf)
-    l = cumulative(pdf, 0.25)
-    r = cumulative(pdf, 0.75)
+function fromPdf(dist::GaussianPdf)
+    l = cdf(dist, 0.25)
+    r = cdf(dist, 0.75)
     x=0
 end
 
-function fromPdf(pdf::BoundedGaussianPdf)
+function fromPdf(dist::BoundedGaussianPdf)
     println("Not implemented")
     #raise/throw error
 end
@@ -152,22 +152,22 @@ function findC( x1::Float64, y1::Float64,
 end
 
 
-#function fromPdfControlPoints(pdf::GaussianPdf, 
-function fromPdfControlPoints(pdf::SimplePdf,
-#function fromPdfControlPoints(pdf::Pdf, 
+#function fromPdfControlPoints(dist::GaussianPdf, 
+function fromPdfControlPoints(dist::SimplePdf,
+#function fromPdfControlPoints(dist::Pdf, 
                               controlPoints::Array{Float64,1},
                               leftTail::Bool,
                               rightTail::Bool)
     logarithmOfDensity = Float64[]
     curvatures = Float64[]
-    lod = log(evaluate(pdf, controlPoints[1]));
+    lod = log(pdf(dist, controlPoints[1]));
     if lod < -20
         lod = -20;
     end
     push!(logarithmOfDensity, lod)
     
     for i = [2:1:length(controlPoints)]
-        lod = log(evaluate(pdf, controlPoints[i]));
+        lod = log(pdf(dist, controlPoints[i]));
         if lod < -20
             lod = -20;
         end
@@ -178,8 +178,8 @@ function fromPdfControlPoints(pdf::SimplePdf,
 		    logarithmOfDensity[i-1],
 		    controlPoints[i],
 		    logarithmOfDensity[i],
-		    cumulative(pdf, controlPoints[i])
-		    -cumulative(pdf, controlPoints[i-1])
+		    cdf(dist, controlPoints[i])
+		    -cdf(dist, controlPoints[i-1])
 		    )
 	      )
     end
