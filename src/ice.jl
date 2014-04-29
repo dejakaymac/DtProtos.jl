@@ -184,35 +184,32 @@ function fromPdfControlPoints(dist::SimplePdf,
 	      )
     end
     hasLeftTail = curvatures[1] > 0;
-    err(hasLeftTail)
-    err(curvatures[1])
-    err(curvatures)
+    warn("0 hasLeftTail $hasLeftTail")
     if (hasLeftTail) 
         alpha=(controlPoints[2]-controlPoints[1])/2;
         beta=(controlPoints[1]+controlPoints[2])/2;
         b=(logarithmOfDensity[2]-logarithmOfDensity[1])/2;
-        err("baz")
-        err(controlPoints[1])
-        err( b/2/curvatures[1]*alpha+beta)
         hasLeftTail = (controlPoints[1] <= b/2/curvatures[1]*alpha+beta);
+        warn("1 hasLeftTail $hasLeftTail")
     end
-    err(hasLeftTail)
     if (hasLeftTail)
         hasLeftTail = leftTail;
-        debug("hasLeftTail $hasLeftTail")
+        warn("2 hasLeftTail $hasLeftTail")
     end
     
     hasRightTail = curvatures[length(curvatures)] > 0;
+    warn("0 hasRightTail $hasRightTail")
     if (hasRightTail) 
         k = length(curvatures)
         alpha = (controlPoints[k+1]-controlPoints[k])/2;
         beta = (controlPoints[k]+controlPoints[k+1])/2;
-        b= (logarithmOfDensity[k+1]-logarithmOfDensity[k])/2;
+        b = (logarithmOfDensity[k+1]-logarithmOfDensity[k])/2;
         hasRightTail = (controlPoints[k+1] >= b/2/curvatures[k]*alpha+beta);
+        warn("1 hasRightTail $hasRightTail")
     end
     if (hasRightTail)
         hasRightTail = rightTail;
-        debug("hasRightTail $hasRightTail")
+        warn("2 hasRightTail $hasRightTail")
     end
     
     #warn("controlPoints     : $(controlPoints)")

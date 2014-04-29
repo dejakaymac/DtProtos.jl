@@ -5,7 +5,7 @@ using PyPlot
 using Distributions
 #import Distributions
 using Logging
-Logging.configure(level=OFF)
+Logging.configure(level=WARNING)
 export SimplePdf, GaussianPdf, BoundedGaussianPdf,Pdf, pdf, cdf, quantile
 
 abstract SimplePdf # must have: mu::Float64, sigma::Float64, weight::Float64
@@ -49,7 +49,7 @@ function pdf(dist::BoundedGaussianPdf, x::Float64)
     else
         probability = 0.0
     end
-    debug("Need to rescale this??")
+    #debug("Need to rescale this??")
     return probability
 end
 
@@ -77,8 +77,10 @@ function cdf(dist::BoundedGaussianPdf, x::Number)
         F = Distributions.cdf(f,x) - Distributions.cdf(f, dist.lower)
     elseif (x < dist.lower)
         F = 0.0
+        #F = Distributions.cdf(f, dist.lower)
     elseif (x > dist.upper)
-        F = 1.0
+        #F = 1.0
+        F = Distributions.cdf(f,dist.upper) - Distributions.cdf(f, dist.lower)
     else
         error("Crazy x")
     end
@@ -153,6 +155,7 @@ function quantile(dist::Pdf, probability::Number)
         c = (a + b)/2
         pc = cdf(dist, c) - probability
         if abs(pc) < tol
+            println("xxx $(cdf(dist, c)) - $probability")
             break #return c
         end
         n += 1

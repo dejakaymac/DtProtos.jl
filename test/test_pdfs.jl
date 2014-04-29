@@ -72,3 +72,28 @@ plot(x,invFp,"o")
 #invFp = quantile(n)
 #plot(invFp[1],invFp[2],"o")
 
+# quantile - Bounded Pdf
+figure()
+lb, ub = -4.0, 8.0
+dx = 0.05
+p1 = BoundedGaussianPdf(-3.0, 0.5, 1.0, lb, ub)
+p2 = BoundedGaussianPdf( 0.0, 1.0, 1.0, lb, ub)
+p3 = BoundedGaussianPdf( 7.0, 1.5, 1.0, lb, ub)
+
+p = SimplePdf[]
+push!(p,p1)
+push!(p,p2)
+push!(p,p3)
+
+n = Pdf(p)
+x = [lb+dx/1.5:dx:ub-dx/2]
+fx = [pdf(n,xi) for xi in x]
+Fx = [cdf(n,xi) for xi in x]# prob
+#invFp = [quantile(n, Fxi) for Fxi in Fx]
+invFp = [pdf(n, quantile(n, Fxi)) for Fxi in Fx]
+plot(x,fx)
+plot(x,Fx)
+plot(x,invFp,"o")
+#invFp = quantile(n)
+#plot(invFp[1],invFp[2],"o")
+
