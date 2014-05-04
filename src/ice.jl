@@ -8,7 +8,8 @@ Logging.configure(level=DEBUG)
 using DtProtos.pdfs
 
 
-export normalise!, area, A, fromPdf, fromPdfControlPoints
+#export normalise!, area, A, fromPdf, fromPdfControlPoints
+export fromPdf, fromPdfControlPoints, fromPdfScale, fromBoundedPdfScale
 
 
 # type IcePdf # move me to ice module
@@ -24,6 +25,70 @@ type IcePdf # move me to ice module
     hasLeftTail::Bool
     hasRightTail::Bool
 end
+
+function pdf(icepdf::IcePdf, x::Number)
+    error("Not yet implelemted")
+end
+
+function segment(icepdf::IcePdf, z::Number)
+    #assertNonEmpty();
+    nsegs = length(icepdf.curvatures)
+    if (z < icepdf.curvatures[0])
+        if (icepdf.hasLeftTail) 
+            return 0
+        else
+            return -1;
+        end
+    end
+    for i = [1:nsegs] #for (int i=0;i<numberOfSegments;++i)
+        if (z < icepdf.controlPoints[i+1]) 
+            return i
+        end
+        if (icepdf.hasRightTail) 
+            return (nsegs - 1)
+        else
+            return -1
+        end
+    end
+end
+
+
+function cdf(icepdf::IcePdf, x::Number)
+    #assertNonEmpty();
+    i = segment(icepdf, x);
+    if (i == -1) 
+        if (z < icepdf.controlPoints[1]) 
+            return 0.0
+        else
+            return 1.0
+        end
+    end
+    r = 0.0
+    for j = [1:i] # for (int j=0;j<i;++j)
+        alpha = (icepdf.controlPoints[j+1] - 
+                 icepdf.controlPoints[j]) / 2
+        r += A(j) * alpha
+    end
+    localZ = (2 * z - 
+              icepdf.controlPoints[i+1] - 
+              icepdf.controlPoints[i] ) / 
+              (icepdf.controlPoints[i+1] - 
+               icepdf.controlPoints[i])
+    alpha = (icepdf.controlPoints[i+1] - 
+             icepdf.controlPoints[i]) / 2
+    a = (icepdf.logarithmOfDensity[i] + 
+         icepdf.logarithmOfDensity[i+1]) / 2
+    b = (icepdf.logarithmOfDensity[i+1] - 
+         icepdf.logarithmOfDensity[i]) / 2
+    if (i == 0 && icepdf.hasLeftTail)
+        return (I(localZ, a, b, icepdf.curvatures[i]) - 
+                I(-Inf,   a, b, icepdf.curvatures[i])) * alpha
+    end
+    r += (I(localZ, a, b, icepdf.curvatures[i]) - 
+          I(-1,     a, b, icepdf.curvatures[i])) * alpha
+    return r
+end
+
 
 function normalise!(icepdf::IcePdf)
     # #assertNonEmpty();
@@ -58,26 +123,6 @@ function A(icepdf::IcePdf, i::Number)
         return I(Inf,a,b,icepdf.curvatures[i])-I(-1,a,b,icepdf.curvatures[i]);
     end
     return I(1,a,b,icepdf.curvatures[i])-I(-1,a,b,icepdf.curvatures[i]);
-end
-
-
-
-# does fromPDFControlPoints use InverseCumulative() much?
-# if so this is bad
-
-function fromPdf(dist::SimplePdf)
-    println("From SimplePdf")
-end
-
-function fromPdf(dist::GaussianPdf)
-    l = cdf(dist, 0.25)
-    r = cdf(dist, 0.75)
-    x=0
-end
-
-function fromPdf(dist::BoundedGaussianPdf)
-    println("Not implemented")
-    #raise/throw error
 end
 
 function C(b::Number, c::Number)
@@ -232,4 +277,84 @@ end
 
 
 
+
+# does fromPDFControlPoints use InverseCumulative() much?
+# if so this is bad
+
+function fromPdf(dist::SimplePdf)
+    println("From SimplePdf")
+end
+
+function fromPdf(dist::GaussianPdf)
+    l = cdf(dist, 0.25)
+    r = cdf(dist, 0.75)
+    x=0
+end
+
+function fromPdf(dist::BoundedGaussianPdf)
+    println("Not implemented")
+    #raise/throw error
+end
+
+
+function fromPdfScale(dist::Pdf,
+                      maxcontrolpoints::Number,
+                      targeterror::Float64)
+    x = Float64[]
+    x0 = quantile(dist, 0.25)
+    x1 = quantile(dist, 0.75)
+    push!(x, x0, x1)
+    scale = x1 - x0
+    #for cp = [length(x):]
+    cp = length(x)
+    while cp < maxcontrolpoints #   for (int controlPoints=2; controlPoints < maxControlPoints; ++controlPoints)
+        sort!(x)
+        ipdf = fromPdfControlPoints(dist,
+                                     x,
+                                     false,
+                                     false)
+    #     maxerror = 0.0
+    #     for k = [1:cp]  #for (int k=0; k < controlPoints+1 ; ++k)
+    #         if (k == 1)
+    #             l = quantile(dist, targeterror)
+    #         else 
+    #             l = x[k-1]
+    #         end
+            
+    #         if (k == cp)
+    #             r = quantile(dist, 1-targetError)
+    #         else
+    #             r = x[k]
+    #         end
+    #         step = scale / 50
+    #         if ((r-l)/4<step)
+    #             step = ((r-l)/4)
+    #         end
+    #         z = l + step
+    #         while (r-z > step > 2.0) #for (z=l+step; r-z > step/2; z+=step)
+    #             error = abs((cdf(dist, z) - cdf(dist, l)) -
+    #                         (cdf(ipdf, z) - cdf(ipdf, l)))
+                
+
+    #             z += step
+    #         end
+
+
+    #     end
+
+    println("yolo bro")
+
+    #     cp += 1
+    end
+    
+end
+
+function fromBoundedPdfScale(dist::BoundedGaussianPdf)
+    println("Not implemented")
+    #raise/throw error
+end
+
+
+
 end # module
+

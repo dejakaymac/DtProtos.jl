@@ -6,6 +6,13 @@ Logging.configure(level=INFO)
 using DtProtos.ice
 using DtProtos.pdfs
 
+#include("../src/ice.jl")
+
+#reload("DtProtos")
+
+reload("../src/DtProtos.jl")
+reload("../src/pdfs.jl")
+reload("../src/ice.jl")
 
 #include("../src/DtProtos.jl")
 #include("../src/ice.jl")
@@ -35,26 +42,47 @@ n = Pdf(p)
 
 #n = GaussianPdf(0,1,1)
 
-# nice = fromPdf(n)
-# #cps = [-3:0.5:3]
-# cps = [-6:0.5:7] # f, t
-#cps = [-6:0.5:15]  # t, f
-cps = [lb+0.02:0.5:ub-0.01]
 
-#cps = [lb:0.5:ub]
-#nice = fromPdfControlPoints(n, cps, true, true)
-nice = fromPdfControlPoints(n, cps, false, false)
-#info("nice $nice")
-info("controlPoints     : $(nice.controlPoints)")
-info("logarithmOfDensity: $(nice.logarithmOfDensity)")
-info("curvatures        : $(nice.curvatures)")
-info("left, right       : $(nice.hasLeftTail), $(nice.hasRightTail)")
 
-x = cps
-fx = [pdf(n,xi) for xi in x]
-Fx = [cdf(n,xi) for xi in x]# prob
-#invFp = [inverseCumulative(n, Fxi) for Fxi in Fx]
-invFp = [pdf(n, quantile(n, Fxi)) for Fxi in Fx]
-plot(x,fx)
-plot(x,Fx)
-plot(x,invFp,"o")
+
+##########################
+# Optimised cnotrolpoints (fromPdfControlPoints)
+##########################
+
+#cps = [lb+0.02:0.5:ub-0.01]
+#nice = fromPdfControlPoints(n, cps, false, false)
+println("baz")
+nice = fromPdfScale(n, 15, 0.0001)
+
+
+
+
+
+
+# ##########################
+# # Hardcoded cnotrolpoints (fromPdfControlPoints)
+# ##########################
+
+# # nice = fromPdf(n)
+# # #cps = [-3:0.5:3]
+# # cps = [-6:0.5:7] # f, t
+# #cps = [-6:0.5:15]  # t, f
+# cps = [lb+0.02:0.5:ub-0.01]
+
+# #cps = [lb:0.5:ub]
+# #nice = fromPdfControlPoints(n, cps, true, true)
+# nice = fromPdfControlPoints(n, cps, false, false)
+# #info("nice $nice")
+# info("controlPoints     : $(nice.controlPoints)")
+# info("logarithmOfDensity: $(nice.logarithmOfDensity)")
+# info("curvatures        : $(nice.curvatures)")
+# info("left, right       : $(nice.hasLeftTail), $(nice.hasRightTail)")
+
+# x = cps
+# fx = [pdf(n,xi) for xi in x]
+# Fx = [cdf(n,xi) for xi in x]# prob
+# #invFp = [inverseCumulative(n, Fxi) for Fxi in Fx]
+# invFp = [pdf(n, quantile(n, Fxi)) for Fxi in Fx]
+# plot(x,fx)
+# plot(x,Fx)
+# plot(x,invFp,"o")

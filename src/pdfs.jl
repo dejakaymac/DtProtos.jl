@@ -71,6 +71,10 @@ function cdf(dist::GaussianPdf, x::Number)
     Distributions.cdf(F,x) 
     end
 
+function cdf!(dist::GaussianPdf, x::Number)
+    error("Not implelemented yet")
+    end
+
 function cdf(dist::BoundedGaussianPdf, x::Number)
     f = Distributions.Normal(dist.mu, dist.sigma)
     if  (dist.lower <= x <= dist.upper)
