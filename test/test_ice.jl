@@ -10,9 +10,9 @@ using DtProtos.pdfs
 
 #reload("DtProtos")
 
-reload("../src/DtProtos.jl")
-reload("../src/pdfs.jl")
-reload("../src/ice.jl")
+## reload("../src/DtProtos.jl")
+## reload("../src/pdfs.jl")
+## reload("../src/ice.jl")
 
 #include("../src/DtProtos.jl")
 #include("../src/ice.jl")
@@ -29,33 +29,37 @@ lb, ub = -4.0, 8.0
 lb, ub = -4.0, 8.0
 ## n = GaussianPdf(0,1,1)
 #p1 = GaussianPdf( -3.0, 0.5, 1.0)
-#p1 = GaussianPdf( -3.0, 2.0, 1.0)
-#p2 = GaussianPdf( 0.0, 1.0, 1.0)
-#p3 = GaussianPdf( 7.0, 1.5, 1.0)
-p1 = BoundedGaussianPdf(-3.0, 2.0, 1.0, lb, ub)
-p2 = BoundedGaussianPdf( 0.0, 1.0, 1.0, lb, ub)
-p3 = BoundedGaussianPdf( 7.0, 1.5, 1.0, lb, ub)
+p1 = GaussianPdf( -3.0, 2.0, 1.0)
+p2 = GaussianPdf( 0.0, 1.0, 1.0)
+p3 = GaussianPdf( 7.0, 1.5, 1.0)
+#p1 = BoundedGaussianPdf(-3.0, 2.0, 1.0, lb, ub)
+#p2 = BoundedGaussianPdf( 0.0, 1.0, 1.0, lb, ub)
+#p3 = BoundedGaussianPdf( 7.0, 1.5, 1.0, lb, ub)
 p = SimplePdf[]
-push!(p,p1); push!(p,p2); push!(p,p3)
-#push!(p,p2); push!(p,p2); push!(p,p2)
+#push!(p,p1); push!(p,p2); push!(p,p3)
+push!(p,p2); push!(p,p2); push!(p,p2)
 n = Pdf(p)
 
 #n = GaussianPdf(0,1,1)
-
-
-
+x = [3*lb:(ub-lb)/20:2*ub]
+fx = [pdf(n,xi) for xi in x]
+plot(x,fx,"o-")
+draw()
+show()
 
 ##########################
-# Optimised cnotrolpoints (fromPdfControlPoints)
+# Optimised controlpoints (fromPdfControlPoints)
 ##########################
 
 #cps = [lb+0.02:0.5:ub-0.01]
 #nice = fromPdfControlPoints(n, cps, false, false)
 println("baz")
-nice = fromPdfScale(n, 15, 0.0001)
-
-
-
+nice = fromPdfScale(n, 15, 0.001)
+info("controlPoints     : ", join(nice.controlPoints, " "))
+info("logarithmOfDensity: ", join(nice.logarithmOfDensity, " "))
+info("curvatures        : ", join(nice.curvatures, " "))
+info("left, right       : $(nice.hasLeftTail), $(nice.hasRightTail)")
+info("n                 : $(length(nice.controlPoints))")
 
 
 

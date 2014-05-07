@@ -3,22 +3,11 @@ module ice
 # package code goes here
 using PyPlot
 using Logging
-Logging.configure(level=DEBUG)
-#include("pdf.jl")
 using DtProtos.pdfs
 
-
-#export normalise!, area, A, fromPdf, fromPdfControlPoints
 export fromPdf, fromPdfControlPoints, fromPdfScale, fromBoundedPdfScale
 
-
-# type IcePdf # move me to ice module
-#     a::Float64
-#     b::Float64
-#     c::Float64
-# end
-
-type IcePdf # move me to ice module
+type IcePdf 
     controlPoints::Array{Float64,1}
     logarithmOfDensity::Array{Float64,1}
     curvatures::Array{Float64,1}
@@ -33,7 +22,7 @@ end
 function segment(icepdf::IcePdf, z::Number)
     #assertNonEmpty();
     nsegs = length(icepdf.curvatures)
-    if (z < icepdf.curvatures[0])
+    if (z < icepdf.curvatures[1])
         if (icepdf.hasLeftTail) 
             return 0
         else
@@ -53,9 +42,9 @@ function segment(icepdf::IcePdf, z::Number)
 end
 
 
-function cdf(icepdf::IcePdf, x::Number)
+function cdf(icepdf::IcePdf, z::Number)
     #assertNonEmpty();
-    i = segment(icepdf, x);
+    i = segment(icepdf, z);
     if (i == -1) 
         if (z < icepdf.controlPoints[1]) 
             return 0.0
@@ -67,7 +56,7 @@ function cdf(icepdf::IcePdf, x::Number)
     for j = [1:i] # for (int j=0;j<i;++j)
         alpha = (icepdf.controlPoints[j+1] - 
                  icepdf.controlPoints[j]) / 2
-        r += A(j) * alpha
+        r += A(icepdf, j) * alpha
     end
     localZ = (2 * z - 
               icepdf.controlPoints[i+1] - 
@@ -92,6 +81,9 @@ end
 
 function normalise!(icepdf::IcePdf)
     # #assertNonEmpty();
+    err("area(icepdf) ", area(icepdf))
+    ## error(area(icepdf))
+    ## error(log(area(icepdf)))
     la = log(area(icepdf));
     for i = [1:length(icepdf.logarithmOfDensity)] #(unsigned i=0;i<myLogarithmOfDensity.size();++i)
         icepdf.logarithmOfDensity[i] -= la;
@@ -101,11 +93,17 @@ end
 
 function area(icepdf::IcePdf)
     #assertNonEmpty();
+    err("quz")
     r = 0.0;
+    #for j = [1:1:length(icepdf.curvatures)] # (unsigned j=0;j<myCurvatures.size();++j)
     for j = [1:1:length(icepdf.curvatures)] # (unsigned j=0;j<myCurvatures.size();++j)
         alpha = (icepdf.controlPoints[j+1] - icepdf.controlPoints[j])/2;
+        err("cps          ", icepdf.controlPoints)
+        err("alpha        ", alpha)
+        err("A(icepdf, j) ", A(icepdf, j))
         r += A(icepdf, j)*alpha;
     end
+    err("quz good")
     return r;
 end
 
@@ -113,10 +111,11 @@ function A(icepdf::IcePdf, i::Number)
     # assertNonEmpty();
     a = (icepdf.logarithmOfDensity[i] + icepdf.logarithmOfDensity[i+1])/2;
     b = (icepdf.logarithmOfDensity[i+1] - icepdf.logarithmOfDensity[i])/2;
-    if (i==0 && i==length(icepdf.curvatures) && icepdf.HasLeftTail && icepdf.HasRightTail)
+    #if (i==0 && i==(length(icepdf.curvatures)) && icepdf.hasLeftTail && icepdf.hasRightTail)
+    if (i==1 && i==(length(icepdf.curvatures)-1) && icepdf.hasLeftTail && icepdf.hasRightTail)
         return I(Inf,a,b,icepdf.curvatures[i])-I(-Inf,a,b,icepdf.curvatures[i]);
     end
-    if (i==0 && icepdf.hasLeftTail)
+    if (i==1 && icepdf.hasLeftTail)
         return I(1,a,b,icepdf.curvatures[i])-I(-Inf,a,b,icepdf.curvatures[i]);
     end
     if (i==length(icepdf.curvatures) && icepdf.hasRightTail)
@@ -198,21 +197,21 @@ end
 
 
 #function fromPdfControlPoints(dist::GaussianPdf, 
-function fromPdfControlPoints(dist::SimplePdf,
-#function fromPdfControlPoints(dist::Pdf, 
+#function fromPdfControlPoints(dist::SimplePdf,
+function fromPdfControlPoints(dist::Pdf, 
                               controlPoints::Array{Float64,1},
                               leftTail::Bool,
                               rightTail::Bool)
     logarithmOfDensity = Float64[]
     curvatures = Float64[]
-    lod = log(pdf(dist, controlPoints[1]));
+    lod = log(pdfs.pdf(dist, controlPoints[1]));
     if lod < -20
         lod = -20;
     end
     push!(logarithmOfDensity, lod)
     
     for i = [2:1:length(controlPoints)]
-        lod = log(pdf(dist, controlPoints[i]));
+        lod = log(pdfs.pdf(dist, controlPoints[i]));
         if lod < -20
             lod = -20;
         end
@@ -223,44 +222,44 @@ function fromPdfControlPoints(dist::SimplePdf,
 		    logarithmOfDensity[i-1],
 		    controlPoints[i],
 		    logarithmOfDensity[i],
-		    cdf(dist, controlPoints[i])
-		    -cdf(dist, controlPoints[i-1])
+		    pdfs.cdf(dist, controlPoints[i])
+		    -pdfs.cdf(dist, controlPoints[i-1])
 		    )
 	      )
     end
     hasLeftTail = curvatures[1] > 0;
-    warn("0 hasLeftTail $hasLeftTail")
+    debug("0 hasLeftTail $hasLeftTail")
     if (hasLeftTail) 
         alpha=(controlPoints[2]-controlPoints[1])/2;
         beta=(controlPoints[1]+controlPoints[2])/2;
         b=(logarithmOfDensity[2]-logarithmOfDensity[1])/2;
         hasLeftTail = (controlPoints[1] <= b/2/curvatures[1]*alpha+beta);
-        warn("1 hasLeftTail $hasLeftTail")
+        debug("1 hasLeftTail $hasLeftTail")
     end
     if (hasLeftTail)
         hasLeftTail = leftTail;
-        warn("2 hasLeftTail $hasLeftTail")
+        debug("2 hasLeftTail $hasLeftTail")
     end
     
     hasRightTail = curvatures[length(curvatures)] > 0;
-    warn("0 hasRightTail $hasRightTail")
+    debug("0 hasRightTail $hasRightTail")
     if (hasRightTail) 
         k = length(curvatures)
         alpha = (controlPoints[k+1]-controlPoints[k])/2;
         beta = (controlPoints[k]+controlPoints[k+1])/2;
         b = (logarithmOfDensity[k+1]-logarithmOfDensity[k])/2;
         hasRightTail = (controlPoints[k+1] >= b/2/curvatures[k]*alpha+beta);
-        warn("1 hasRightTail $hasRightTail")
+        debug("1 hasRightTail $hasRightTail")
     end
     if (hasRightTail)
         hasRightTail = rightTail;
-        warn("2 hasRightTail $hasRightTail")
+        debug("2 hasRightTail $hasRightTail")
     end
     
-    #warn("controlPoints     : $(controlPoints)")
-    #warn("logarithmOfDensity: $(logarithmOfDensity)")
-    #warn("curvatures        : $(curvatures)")
-    warn("left, right       : $(hasLeftTail), $(hasRightTail)")
+    #debug("controlPoints     : $(controlPoints)")
+    #debug("logarithmOfDensity: $(logarithmOfDensity)")
+    #debug("curvatures        : $(curvatures)")
+    debug("left, right       : $(hasLeftTail), $(hasRightTail)")
     r = IcePdf(controlPoints,
                logarithmOfDensity,
                curvatures,
@@ -268,10 +267,10 @@ function fromPdfControlPoints(dist::SimplePdf,
                hasRightTail);
     r = normalise!(r);
 
-    #warn("controlPoints     : $(controlPoints)")
-    #warn("logarithmOfDensity: $(logarithmOfDensity)")
-    #warn("curvatures        : $(curvatures)")
-    warn("left, right       : $(hasLeftTail), $(hasRightTail)")
+    #debug("controlPoints     : $(controlPoints)")
+    #debug("logarithmOfDensity: $(logarithmOfDensity)")
+    #debug("curvatures        : $(curvatures)")
+    debug("left, right       : $(hasLeftTail), $(hasRightTail)")
     return r;
 end
 
@@ -308,45 +307,66 @@ function fromPdfScale(dist::Pdf,
     #for cp = [length(x):]
     cp = length(x)
     while cp < maxcontrolpoints #   for (int controlPoints=2; controlPoints < maxControlPoints; ++controlPoints)
-        sort!(x)
+        info("cp $cp")
         ipdf = fromPdfControlPoints(dist,
                                      x,
                                      false,
                                      false)
-    #     maxerror = 0.0
-    #     for k = [1:cp]  #for (int k=0; k < controlPoints+1 ; ++k)
-    #         if (k == 1)
-    #             l = quantile(dist, targeterror)
-    #         else 
-    #             l = x[k-1]
-    #         end
-            
-    #         if (k == cp)
-    #             r = quantile(dist, 1-targetError)
-    #         else
-    #             r = x[k]
-    #         end
-    #         step = scale / 50
-    #         if ((r-l)/4<step)
-    #             step = ((r-l)/4)
-    #         end
-    #         z = l + step
-    #         while (r-z > step > 2.0) #for (z=l+step; r-z > step/2; z+=step)
-    #             error = abs((cdf(dist, z) - cdf(dist, l)) -
-    #                         (cdf(ipdf, z) - cdf(ipdf, l)))
+        maxerror = 0.0
+        bestz = 0.0 
+        for k = [1:cp]  #for k = [1:cp]  #for (int k=0; k < controlPoints+1 ; ++k)
+            debug("k $k")
+            if (k == 1)
+                l = quantile(dist, targeterror)
+            else 
+                l = x[k-1]
+            end
+            if (k == cp)
+                r = quantile(dist, 1-targeterror)
+            else
+                debug("$k, $(length(x)) " )
+                r = x[k]
+            end
+            step = scale / 50
+            if ((r-l)/4<step)
+                step = ((r-l)/4)
+            end
+            z = l + step
+            debug("z = l + step :  $z = $l + $step")
+            debug("r-z = $(r-z)")
+            while (r-z > step / 2.0) #for (z=l+step; r-z > step/2; z+=step)
+                debug("r-z $(r-z)")
+                pdfs.cdf(dist, z)
+                pdfs.cdf(dist, l)
+                cdf(ipdf, z)
+                cdf(ipdf, l)
                 
-
-    #             z += step
-    #         end
-
-
-    #     end
-
-    println("yolo bro")
-
-    #     cp += 1
-    end
-    
+                error = abs((pdfs.cdf(dist, z) - pdfs.cdf(dist, l)) -
+                            (cdf(ipdf, z) - cdf(ipdf, l)))
+                if ((error > maxerror) &&
+                    (pdfs.pdf(dist, z) > ((5e-5)/scale)))
+                    bestz = z;
+                    maxerror = error;
+                end
+                z += step
+            end # while r-z
+            error = abs((pdfs.cdf(dist, r) - pdfs.cdf(dist, l)) -
+                        (cdf(ipdf, r) - cdf(ipdf, l)))
+            if ((error > maxerror) && (pdfs.pdf(dist, (l+r)/2) > ((5e-5)/scale)) )
+                bestz = (l+r)/2
+                maxerror = error
+            end
+        end # for k
+        if (maxerror < targeterror)
+            debug("breaking")
+            break
+        end
+        debug("bestz = $bestz")
+        push!(x, bestz);
+        cp += 1
+    end  # while cp
+    sort!(x)
+    return fromPdfControlPoints(dist,x,false,false);
 end
 
 function fromBoundedPdfScale(dist::BoundedGaussianPdf)

@@ -3,9 +3,8 @@ module pdfs
 # package code goes here
 using PyPlot
 using Distributions
-#import Distributions
 using Logging
-Logging.configure(level=WARNING)
+
 export SimplePdf, GaussianPdf, BoundedGaussianPdf,Pdf, pdf, cdf, quantile
 
 abstract SimplePdf # must have: mu::Float64, sigma::Float64, weight::Float64
@@ -159,7 +158,7 @@ function quantile(dist::Pdf, probability::Number)
         c = (a + b)/2
         pc = cdf(dist, c) - probability
         if abs(pc) < tol
-            println("xxx $(cdf(dist, c)) - $probability")
+            debug("cdf(c) - p = $(cdf(dist, c)) - $probability")
             break #return c
         end
         n += 1
@@ -172,7 +171,9 @@ function quantile(dist::Pdf, probability::Number)
         end
     end
     if n == nmax + 1
-        warn("Reached max iter $nmax, tol = $tol, pc = $pc, a, b = $a, $b")
+        warn("Reached max iter $nmax, tol = $tol, ",
+             "cdf(c) = $(round(pc+probability,3)), p = $probability, ",
+             "a, b, c = $a, $b, $c")
     end
     debug("quantile niter = $n, c = $c")
     return c #,f
