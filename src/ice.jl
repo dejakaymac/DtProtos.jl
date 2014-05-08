@@ -28,7 +28,7 @@ function segment(icepdf::IcePdf, z::Number)
     err("icepdf.curvatures[1] $(icepdf.curvatures[1])")
     if (z < icepdf.curvatures[1])
         if (icepdf.hasLeftTail) 
-            return 0
+            return 1
         else
             return -1;
         end
@@ -52,6 +52,7 @@ function cdf(icepdf::IcePdf, z::Number)
     #assertNonEmpty();
     debug("== Ice.cdf(icepdf::IcePdf, z::Number)")
     i = segment(icepdf, z);
+    debug("= segment done")
     if (i == -1) 
         if (z < icepdf.controlPoints[1]) 
             return 0.0
@@ -68,6 +69,7 @@ function cdf(icepdf::IcePdf, z::Number)
         r += A(icepdf, j) * alpha
     end
     err("yoyo 3")
+    err("index i: $i")
     err("icepdf.controlPoints $(icepdf.controlPoints)")
     localZ = (2 * z - 
               icepdf.controlPoints[i+1] - 
@@ -333,8 +335,9 @@ function fromPdfScale(dist::Pdf,
     x = Float64[]
     x0 = quantile(dist, 0.25)
     x1 = quantile(dist, 0.5)
+    x1b = quantile(dist, 0.6)
     x2 = quantile(dist, 0.75)
-    push!(x, x0, x1, x2)
+    push!(x, x0, x1, x1b, x2)
     scale = x1 - x0
     #for cp = [length(x):]
     cp = length(x)
