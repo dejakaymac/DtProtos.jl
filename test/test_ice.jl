@@ -1,10 +1,16 @@
 import Base.Test.@test
+
+using Autoreload
 using PyPlot
 using Logging
-Logging.configure(level=INFO)
+#Logging.configure(level=INFO)
+Logging.configure(level=DEBUG)
 
 using DtProtos.ice
 using DtProtos.pdfs
+
+#arequire("../src/ice.jl")
+#arequire("../src/pdfs.jl")
 
 #include("../src/ice.jl")
 
