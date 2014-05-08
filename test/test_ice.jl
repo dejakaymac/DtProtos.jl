@@ -3,8 +3,8 @@ import Base.Test.@test
 using Autoreload
 using PyPlot
 using Logging
-#Logging.configure(level=INFO)
-Logging.configure(level=DEBUG)
+Logging.configure(level=INFO)
+#Logging.configure(level=DEBUG)
 
 using DtProtos.ice
 using DtProtos.pdfs
@@ -36,7 +36,7 @@ lb, ub = -4.0, 8.0
 ## n = GaussianPdf(0,1,1)
 #p1 = GaussianPdf( -3.0, 0.5, 1.0)
 p1 = GaussianPdf( -3.0, 2.0, 1.0)
-p2 = GaussianPdf( 0.0, 1.0, 1.0)
+p2 = GaussianPdf( 0.0, 2.0, 1.0)
 p3 = GaussianPdf( 7.0, 1.5, 1.0)
 #p1 = BoundedGaussianPdf(-3.0, 2.0, 1.0, lb, ub)
 #p2 = BoundedGaussianPdf( 0.0, 1.0, 1.0, lb, ub)
@@ -44,6 +44,7 @@ p3 = GaussianPdf( 7.0, 1.5, 1.0)
 p = SimplePdf[]
 #push!(p,p1); push!(p,p2); push!(p,p3)
 push!(p,p2); push!(p,p2); push!(p,p2)
+#push!(p,p3); push!(p,p3); push!(p,p3)
 n = Pdf(p)
 
 #n = GaussianPdf(0,1,1)
@@ -60,7 +61,8 @@ show()
 #cps = [lb+0.02:0.5:ub-0.01]
 #nice = fromPdfControlPoints(n, cps, false, false)
 println("baz")
-nice = fromPdfScale(n, 15, 0.001)
+#nice = fromPdfScale(n, 15, 0.001) #4
+nice = fromPdfScale(n, 15, 0.0001) #
 info("controlPoints     : ", join(nice.controlPoints, " "))
 info("logarithmOfDensity: ", join(nice.logarithmOfDensity, " "))
 info("curvatures        : ", join(nice.curvatures, " "))
