@@ -24,8 +24,6 @@ function segment(icepdf::IcePdf, z::Number)
     debug("== Ice.segment(icepdf::IcePdf, z::Number)")
     #assertNonEmpty();
     nsegs = length(icepdf.curvatures)
-    err("nsegs: $nsegs")
-    err("icepdf.curvatures[1] $(icepdf.curvatures[1])")
     if (z < icepdf.curvatures[1])
         if (icepdf.hasLeftTail) 
             return 1
@@ -33,9 +31,7 @@ function segment(icepdf::IcePdf, z::Number)
             return -1;
         end
     end
-    err("here")
     for i = [1:nsegs] #for (int i=0;i<numberOfSegments;++i)
-        err("here i: $i")
         if (z < icepdf.controlPoints[i]) 
             return i
         end
@@ -61,17 +57,12 @@ function cdf(icepdf::IcePdf, z::Number)
             return 1.0
         end
     end
-    err("yoyo 1")
     r = 0.0
     for j = [1:i] # for (int j=0;j<i;++j)
         alpha = (icepdf.controlPoints[j+1] - 
                  icepdf.controlPoints[j]) / 2
-        err("yoyo 2")
         r += A(icepdf, j) * alpha
     end
-    err("yoyo 3")
-    err("index i: $i")
-    err("icepdf.controlPoints $(icepdf.controlPoints)")
     localZ = (2 * z - 
               icepdf.controlPoints[i+1] - 
               icepdf.controlPoints[i] ) / 
@@ -97,51 +88,43 @@ end
 function normalise!(icepdf::IcePdf)
     debug("== Ice.normalise!(icepdf::IcePdf)")
     # #assertNonEmpty();
-    err("HHHHHHHHHHHHHHHHHHH")
-    err("-----area(icepdf) ", area(icepdf))
-    ## error(area(icepdf))
-    ## error(log(area(icepdf)))
-
-    baz =  area(icepdf)
-    err(baz)
-    err("++++++++++++++++++++++++++++++")
-
+    err("++++++ ", area(icepdf))
     la = log(area(icepdf));
-    err("baz in")
     for i = [1:length(icepdf.logarithmOfDensity)] #(unsigned i=0;i<myLogarithmOfDensity.size();++i)
-        err("baz $i")
+        err("-----la  ", la)
+        err("-----lod ", icepdf.logarithmOfDensity[i] )
         icepdf.logarithmOfDensity[i] -= la;
     end
-    err("baz out")
     return icepdf
 end
 
 function area(icepdf::IcePdf)
     debug("== Ice.area(icepdf::IcePdf)")
     #assertNonEmpty();
-    err("quz")
     r = 0.0;
     #for j = [1:1:length(icepdf.curvatures)] # (unsigned j=0;j<myCurvatures.size();++j)
     for j = [1:1:length(icepdf.curvatures)] # (unsigned j=0;j<myCurvatures.size();++j)
         alpha = (icepdf.controlPoints[j+1] - icepdf.controlPoints[j])/2;
         if alpha < 0.
-            err("alpha < 0: ", alpha)
             error("j+1, j: $(icepdf.controlPoints[j+1]) $(icepdf.controlPoints[j])")
-        end
-        err("-----------------------------------")
+        end 
         err("cps          ", icepdf.controlPoints)
         err("alpha        ", alpha)
         err("A(icepdf, j) ", A(icepdf, j))
+        debug("cps          ", icepdf.controlPoints)
+        debug("alpha        ", alpha)
+        debug("A(icepdf, j) ", A(icepdf, j))
         r += A(icepdf, j)*alpha;
+        err("r ", r)
     end
     if sign(r) == -1
         if abs(r) < 1e-6
-            r = 0    
+            r = 0.0    
         else
             error("Negative area: ", r)
         end
-    end    
-    err("r ", r)
+    end  
+    err("r final ", r)  
     return r;
 end
 
@@ -207,10 +190,10 @@ function findC( x1::Float64, y1::Float64,
     debug("== Ice.findC(x1::Float64, y1::Float64,",
           "x2::Float64, y2::Float64, A::Float64)")
 
-    a=(y1+y2)/2;
-    b=(y2-y1)/2;
-    l=-1;
-    r=1;
+    a = (y1+y2)/2;
+    b = (y2-y1)/2;
+    l = -1;
+    r = 1;
     m = 0;
     localA = A/(x2-x1)*2;
     while I(1,a,b,C(b,l))-I(-1,a,b,C(b,l)) > localA
@@ -250,7 +233,6 @@ function fromPdfControlPoints(dist::Pdf,
           "leftTail::Bool,rightTail::Bool")
     logarithmOfDensity = Float64[]
     curvatures = Float64[]
-    err("hola 1")
     lod = log(pdfs.pdf(dist, controlPoints[1]));
     if lod < -20
         lod = -20;
@@ -258,14 +240,12 @@ function fromPdfControlPoints(dist::Pdf,
     push!(logarithmOfDensity, lod)
     
     for i = [2:1:length(controlPoints)]
-        err("hola 2 $i")
         lod = log(pdfs.pdf(dist, controlPoints[i]));
-        err("hola 3 $i")
+        err("---------- ",lod)
         if lod < -20
             lod = -20;
         end
         push!(logarithmOfDensity, lod)
-        err(curvatures)
         push!(curvatures, 
 	      findC(
 		    controlPoints[i-1],
@@ -276,7 +256,6 @@ function fromPdfControlPoints(dist::Pdf,
 		    -pdfs.cdf(dist, controlPoints[i-1])
 		    )
 	      )
-        err(curvatures)
     end
     hasLeftTail = curvatures[1] > 0;
     debug("0 hasLeftTail $hasLeftTail")
@@ -316,14 +295,8 @@ function fromPdfControlPoints(dist::Pdf,
                curvatures,
                hasLeftTail,
                hasRightTail);
-    err("about to norm")
     r = normalise!(r);
-    err("norm done")
-
-    #debug("controlPoints     : $(controlPoints)")
-    #debug("logarithmOfDensity: $(logarithmOfDensity)")
-    #debug("curvatures        : $(curvatures)")
-    err("left, right       : $(hasLeftTail), $(hasRightTail)")
+    debug("left, right       : $(hasLeftTail), $(hasRightTail)")
     return r;
 end
 
@@ -378,9 +351,7 @@ function fromPdfScale(dist::Pdf,
                                      x,
                                      true,
                                      true)
-        err("HERE $(ipdf.curvatures)")
-        err("=========ipdf cp: $cp")
-        maxerror = 0.0
+        maxdelta = 0.0
         bestz = 0.0 
         for k = [1:cp]  #for k = [1:cp]  #for (int k=0; k < controlPoints+1 ; ++k)
             debug("k $k")
@@ -409,28 +380,35 @@ function fromPdfScale(dist::Pdf,
            
             while (r-z > step / 2.0) #for (z=l+step; r-z > step/2; z+=step)
                 debug("r-z $(r-z)")
-                
-                error = abs((pdfs.cdf(dist, z) - pdfs.cdf(dist, l)) -
+                err(quantile(dist, targeterror))
+                err(l)
+                err(z)
+                err(pdfs.cdf(dist, z) )
+                err(pdfs.cdf(dist, l))
+                err(cdf(ipdf, z))
+                err(cdf(ipdf, l))
+                delta = abs((pdfs.cdf(dist, z) - pdfs.cdf(dist, l)) -
                             (cdf(ipdf, z) - cdf(ipdf, l)))
                 debug("here 4 $(r-z)")
                 debug("here 5 $(r-z)")
-                if ((error > maxerror) &&
+                error("xx", delta)
+                if ((delta > maxdelta) &&
                     (pdfs.pdf(dist, z) > ((5e-5)/scale)))
                     bestz = z;
-                    maxerror = error;
+                    maxdelta = delta;
                 end
                 z += step
             end # while r-z
             debug("Done while r-z")
             
-            error = abs((pdfs.cdf(dist, r) - pdfs.cdf(dist, l)) -
+            delta = abs((pdfs.cdf(dist, r) - pdfs.cdf(dist, l)) -
                         (cdf(ipdf, r) - cdf(ipdf, l)))
-            if ((error > maxerror) && (pdfs.pdf(dist, (l+r)/2) > ((5e-5)/scale)) )
+            if ((delta > maxdelta) && (pdfs.pdf(dist, (l+r)/2) > ((5e-5)/scale)) )
                 bestz = (l+r)/2
-                maxerror = error
+                maxdelta = delta
             end
         end # for k
-        if (maxerror < targeterror)
+        if (maxdelta < targeterror)
             debug("breaking")
             break
         end
