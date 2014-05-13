@@ -5,7 +5,7 @@ using PyPlot
 using Distributions
 using Logging
 
-export SimplePdf, GaussianPdf, BoundedGaussianPdf,Pdf, pdf, cdf, quantile
+export SimplePdf, GaussianPdf, BoundedGaussianPdf,Pdf, pdf, cdf, quantile, normalise!
 
 abstract SimplePdf # must have: mu::Float64, sigma::Float64, weight::Float64
 
@@ -34,6 +34,29 @@ end
 ##   supertype: AbstractMvNormal
 ##   fields   : (:dim,:zeromean,:μ,:Σ)
 ## with identity corelation matrix
+
+
+function normalise!(dist::Pdf, N::Number)
+    sumofweights = 0.0
+    for i = [1:length(dist.components)]
+        sumofweights += dist.components[i].weight
+    end
+    for i = [1:length(dist.components)]
+        dist.components[i].weight = N * dist.components[i].weight / sumofweights
+    end
+    return dist
+end
+    ## void PDF::normalise(const float normalValue)
+    ## {
+    ##     if (size() > 0)
+    ##     {
+    ##         float weightsSum  = sumOfWeights();
+    ##         for (size_t index = 0; index < size(); ++index)
+    ##         {
+    ##             weights[index] = normalValue * weights[index] / weightsSum;
+    ##         }
+    ##     }
+    ## }
 
 
 function pdf(dist::GaussianPdf, x::Float64)

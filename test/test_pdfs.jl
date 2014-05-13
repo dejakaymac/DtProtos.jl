@@ -66,11 +66,30 @@ fx = [pdf(n,xi) for xi in x]
 Fx = [cdf(n,xi) for xi in x]# prob
 #invFp = [quantile(n, Fxi) for Fxi in Fx]
 invFp = [pdf(n, quantile(n, Fxi)) for Fxi in Fx]
-plot(x,fx)
+#plot(x,fx)
 plot(x,Fx)
 plot(x,invFp,"o")
 #invFp = quantile(n)
 #plot(invFp[1],invFp[2],"o")
+
+figure()
+p = SimplePdf[]
+p4 = GaussianPdf( 7.0, 1.5, 5.0)
+push!(p,p1)
+push!(p,p2)
+push!(p,p4)
+n = Pdf(p)
+
+n = normalise!(n, 1.0)
+x = [-10:0.05:10]
+fx = [pdf(n,xi) for xi in x]
+Fx = [cdf(n,xi) for xi in x]# prob
+#invFp = [quantile(n, Fxi) for Fxi in Fx]
+invFp = [pdf(n, quantile(n, Fxi)) for Fxi in Fx]
+plot(x,fx, "ks")
+plot(x,Fx)
+plot(x,invFp,"s")
+
 
 # quantile - Bounded Pdf
 figure()
