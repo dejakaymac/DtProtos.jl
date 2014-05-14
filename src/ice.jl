@@ -58,8 +58,8 @@ function cdf(icepdf::IcePdf, z::Number)
         end
     end
     r = 0.0
-    #for j = [1:i] # for (int j=0;j<i;++j)
-    for j = [1:i-1] # for (int j=0;j<i;++j)
+    for j = [1:i] # for (int j=0;j<i;++j)
+    #for j = [1:i-1] # for (int j=0;j<i;++j)
         alpha = (icepdf.controlPoints[j+1] - 
                  icepdf.controlPoints[j]) / 2
         r += A(icepdf, j) * alpha
@@ -98,6 +98,7 @@ function normalise!(icepdf::IcePdf)
         a = 1e-20
     end
     la = log(a);
+    la = log(area(icepdf))
     for i = [1:length(icepdf.logarithmOfDensity)] #(unsigned i=0;i<myLogarithmOfDensity.size();++i)
         err("-----la  ", la)
         err("-----lod ", icepdf.logarithmOfDensity[i] )
@@ -111,7 +112,7 @@ function area(icepdf::IcePdf)
     #assertNonEmpty();
     r = 0.0;
     #for j = [1:1:length(icepdf.curvatures)] # (unsigned j=0;j<myCurvatures.size();++j)
-    for j = [1:1:length(icepdf.curvatures)] # (unsigned j=0;j<myCurvatures.size();++j)
+    for j = [1:length(icepdf.curvatures)] # (unsigned j=0;j<myCurvatures.size();++j)
         alpha = (icepdf.controlPoints[j+1] - icepdf.controlPoints[j])/2;
         if alpha < 0.
             error("j+1, j: $(icepdf.controlPoints[j+1]) $(icepdf.controlPoints[j])")
@@ -126,8 +127,9 @@ function area(icepdf::IcePdf)
         err("r ", r)
     end
     if sign(r) == -1
+        #error("Negative area: ", r)
         if abs(r) < 1e-8
-            r = 0.0    
+            r = 1e-20
         else
             error("Negative area: ", r)
         end
@@ -142,7 +144,8 @@ function A(icepdf::IcePdf, i::Number)
     a = (icepdf.logarithmOfDensity[i] + icepdf.logarithmOfDensity[i+1])/2;
     b = (icepdf.logarithmOfDensity[i+1] - icepdf.logarithmOfDensity[i])/2;
     #if (i==0 && i==(length(icepdf.curvatures)) && icepdf.hasLeftTail && icepdf.hasRightTail)
-    if (i==1 && i==(length(icepdf.curvatures)) && icepdf.hasLeftTail && icepdf.hasRightTail)
+    if (i==1 && i==(length(icepdf.curvatures)) && 
+        icepdf.hasLeftTail && icepdf.hasRightTail)
         println("here 1")
         return I(Inf,a,b,icepdf.curvatures[i])-I(-Inf,a,b,icepdf.curvatures[i]);
     end
@@ -366,8 +369,14 @@ function fromPdfScale(dist::Pdf,
     #for cp = [length(x):]
     #cp = length(x) 
     cp = length(x) #+ 1
+    z = 0.0
+    step = 0.0
+    l = 0.0
+    r = 0.0
+    
     #error("ASJDBSJD==============================================")
     while cp < maxcontrolpoints #   for (int controlPoints=2; controlPoints < maxControlPoints; ++controlPoints)
+        cp += 1
         info("cp, x : $cp, $x")
         sort!(x)
         ipdf = fromPdfControlPoints(dist,
@@ -398,10 +407,14 @@ function fromPdfScale(dist::Pdf,
                 step = ((r-l)/4)
             end
             z = l + step
+            println(l)
+            println(step)
+            #error(z)
             debug("z = l + step :  $z = $l + $step")
             debug("r-z = $(r-z)")
            
             while (r-z > step / 2.0) #for (z=l+step; r-z > step/2; z+=step)
+                #z += step
                 debug("r-z $(r-z)")
                 err("baz ", quantile(dist, targeterror))
                 err("baz ", l)
@@ -426,7 +439,8 @@ function fromPdfScale(dist::Pdf,
             
             delta = abs((pdfs.cdf(dist, r) - pdfs.cdf(dist, l)) -
                         (cdf(ipdf, r) - cdf(ipdf, l)))
-            if ((delta > maxdelta) && (pdfs.pdf(dist, (l+r)/2) > ((5e-5)/scale)) )
+            if ((delta > maxdelta) && 
+                (pdfs.pdf(dist, (l+r)/2) > ((5e-5)/scale)) )
                 bestz = (l+r)/2
                 maxdelta = delta
             end
@@ -443,7 +457,7 @@ function fromPdfScale(dist::Pdf,
         println("nn",typeof(x))
         println("nn",typeof(bestz))
         #sleep(2)
-        cp += 1
+ 
     end  # while cp
     sort!(x)
     println("x",x)
