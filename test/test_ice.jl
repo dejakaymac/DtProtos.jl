@@ -52,6 +52,7 @@ n = Pdf(p)
 
 #n = GaussianPdf(0,1,1)
 x = [3*lb:(ub-lb)/20:2*ub]
+x = [0.0:60.0]
 fx = [pdf(n,xi) for xi in x]
 plot(x,fx,"o-")
 draw()
@@ -64,13 +65,30 @@ show()
 #cps = [lb+0.02:0.5:ub-0.01]
 #nice = fromPdfControlPoints(n, cps, false, false)
 println("baz")
+p1 = GaussianPdf( 20.0, 8.0, 1.0)
+## 14.6041 25.3959 
+## -3.22585 -3.22585 
+## 0.227468 
+## 1 1
+## 20
+## 64
+p = SimplePdf[]
+push!(p,p1);
+n = Pdf(p)
 #nice = fromPdfScale(n, 15, 0.001) #4
-nice = fromPdfScale(n, 15, 0.0001) #
+nice = fromPdfScale(n, 15, 0.001) #
 info("controlPoints     : ", join(nice.controlPoints, " "))
 info("logarithmOfDensity: ", join(nice.logarithmOfDensity, " "))
 info("curvatures        : ", join(nice.curvatures, " "))
 info("left, right       : $(nice.hasLeftTail), $(nice.hasRightTail)")
 info("n                 : $(length(nice.controlPoints))")
+
+
+fx = [pdf(n,xi) for xi in nice.controlPoints]
+plot(nice.controlPoints, fx, "o-")
+
+figure()
+plot(nice.controlPoints, "o-")
 
 
 
