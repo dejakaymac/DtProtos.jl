@@ -51,12 +51,12 @@ push!(p,p2); push!(p,p2); push!(p,p2)
 n = Pdf(p)
 
 #n = GaussianPdf(0,1,1)
-x = [3*lb:(ub-lb)/20:2*ub]
-x = [0.0:60.0]
-fx = [pdf(n,xi) for xi in x]
-plot(x,fx,"o-")
-draw()
-show()
+## x = [3*lb:(ub-lb)/20:2*ub]
+## x = [0.0:60.0]
+## fx = [pdf(n,xi) for xi in x]
+## plot(x,fx,"o-")
+## draw()
+## show()
 
 ##########################
 # Optimised controlpoints (fromPdfControlPoints)
@@ -83,6 +83,10 @@ info("curvatures        : ", join(nice.curvatures, " "))
 info("left, right       : $(nice.hasLeftTail), $(nice.hasRightTail)")
 info("n                 : $(length(nice.controlPoints))")
 
+figure()
+x = [0.0:60.0]
+fx = [pdf(n,xi) for xi in x]
+plot(x,fx,"o-")
 
 fx = [pdf(n,xi) for xi in nice.controlPoints]
 plot(nice.controlPoints, fx, "o-")

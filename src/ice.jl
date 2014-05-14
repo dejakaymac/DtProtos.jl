@@ -58,7 +58,8 @@ function cdf(icepdf::IcePdf, z::Number)
         end
     end
     r = 0.0
-    for j = [1:i] # for (int j=0;j<i;++j)
+    #for j = [1:i] # for (int j=0;j<i;++j)
+    for j = [1:i-1] # for (int j=0;j<i;++j)
         alpha = (icepdf.controlPoints[j+1] - 
                  icepdf.controlPoints[j]) / 2
         r += A(icepdf, j) * alpha
@@ -125,7 +126,7 @@ function area(icepdf::IcePdf)
         err("r ", r)
     end
     if sign(r) == -1
-        if abs(r) < 1e-10
+        if abs(r) < 1e-8
             r = 0.0    
         else
             error("Negative area: ", r)
