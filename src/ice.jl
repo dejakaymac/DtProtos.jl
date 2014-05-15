@@ -93,11 +93,11 @@ function normalise!(icepdf::IcePdf)
     debug("== Ice.normalise!(icepdf::IcePdf)")
     # #assertNonEmpty();
     err("++++++ ", area(icepdf))
-    a = area(icepdf)
-    if a == 0.0
-        a = 1e-20
-    end
-    la = log(a);
+    ## a = area(icepdf)
+    ## if a == 0.0
+    ##     a = 1e-20
+    ## end
+    ## la = log(a);
     la = log(area(icepdf))
     for i = [1:length(icepdf.logarithmOfDensity)] #(unsigned i=0;i<myLogarithmOfDensity.size();++i)
         err("-----la  ", la)
@@ -359,7 +359,8 @@ function fromPdfScale(dist::Pdf,
     x1b = quantile(dist, 0.6)
     x2 = quantile(dist, 0.75)
     #push!(x, x0, x1, x2)
-    push!(x, x0, x1,x1b, x2)
+    #push!(x, x0, x1,x1b, x2)
+    push!(x, x0, x2)
     #x = [float64(quantile(dist, i)) for i = [0.05:0.05:0.95] ]
     #for i = x
     #    println(i, typeof(i))
@@ -368,7 +369,7 @@ function fromPdfScale(dist::Pdf,
     scale = x2 - x0
     #for cp = [length(x):]
     #cp = length(x) 
-    cp = length(x) #+ 1
+    cp = 3 #length(x) #+ 1
     z = 0.0
     step = 0.0
     l = 0.0
@@ -376,7 +377,6 @@ function fromPdfScale(dist::Pdf,
     
     #error("ASJDBSJD==============================================")
     while cp < maxcontrolpoints #   for (int controlPoints=2; controlPoints < maxControlPoints; ++controlPoints)
-        cp += 1
         info("cp, x : $cp, $x")
         sort!(x)
         ipdf = fromPdfControlPoints(dist,
@@ -398,8 +398,9 @@ function fromPdfScale(dist::Pdf,
                 debug ("k == cp")
                 r = quantile(dist, 1-targeterror)
             else
-                debug (" l = x[k]")
-                debug("$k, $(length(x)) " )
+                debug("l = x[k]")
+                println("$k, $(length(x)) $cp" )
+
                 r = x[k]
             end
             step = scale / 50
@@ -457,7 +458,7 @@ function fromPdfScale(dist::Pdf,
         println("nn",typeof(x))
         println("nn",typeof(bestz))
         #sleep(2)
- 
+        cp += 1
     end  # while cp
     sort!(x)
     println("x",x)
