@@ -73,8 +73,7 @@ function cdf(icepdf::IcePdf, z::Number)
         end
     end
     r = 0.0
-    for j = [1:i] # for (int j=0;j<i;++j)
-    #for j = [1:i-1] # for (int j=0;j<i;++j)
+    for j = [1:i-1] # for (int j=0;j<i;++j)
         alpha = (icepdf.controlPoints[j+1] - 
                  icepdf.controlPoints[j]) / 2
         r += A(icepdf, j) * alpha
@@ -90,7 +89,6 @@ function cdf(icepdf::IcePdf, z::Number)
          icepdf.logarithmOfDensity[i+1]) / 2
     b = (icepdf.logarithmOfDensity[i+1] - 
          icepdf.logarithmOfDensity[i]) / 2
-    #if (i == 0 && icepdf.hasLeftTail)
     if (i == 1 && icepdf.hasLeftTail)
         ltail = (I(localZ, a, b, icepdf.curvatures[i]) - 
                  I(-Inf,   a, b, icepdf.curvatures[i])) * alpha 
@@ -98,7 +96,6 @@ function cdf(icepdf::IcePdf, z::Number)
     end
     r += (I(localZ, a, b, icepdf.curvatures[i]) - 
           I(-1,     a, b, icepdf.curvatures[i])) * alpha
-    
     return r
 end
 

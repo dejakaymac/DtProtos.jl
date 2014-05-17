@@ -24,9 +24,6 @@ function readPdf(fname::String)
 end
 
 
-ipdf = readPdf("data/pdf1.dat")
-
-
 #function testI()
 ifs = open("data/IcePDFtestI.txt", "r");
 for i = [1:140]
@@ -70,28 +67,52 @@ for i = [1:50]
 end
 
 
+#void testArea()
+ipdf1 = readPdf("data/pdf1.dat")
+ipdf2 = readPdf("data/pdf2.dat")
+ipdf3 = readPdf("data/pdf3.dat")
+ipdf4 = readPdf("data/pdf4.dat")
+ipdf5 = readPdf("data/pdf5.dat")
+@test abs(ice.area(pdf1) - 1) < 1e-4
+@test abs(ice.area(pdf2) - 1) < 1e-4
+@test abs(ice.area(pdf3) - 1) < 1e-4
+@test abs(ice.area(pdf4) - 1) < 1e-4
+@test abs(ice.area(pdf5) - 1) < 1e-4
 
+#void testNormalise()
+x = [0., 1.3, 2.]
+y = [.3, .8, -.1]
+c = [1., 3.]
+ipdf = IcePdf(x, y, c, false, false)
+ice.normalise!(ipdf)
+@test abs(ice.area(ipdf) - 1) < 1e-4
+            
 
-
-# #arequire("../src/ice.jl")
-# #arequire("../src/pdfs.jl")
-
-# #include("../src/ice.jl")
-
-# #reload("DtProtos")
-
-# ## reload("../src/DtProtos.jl")
-# ## reload("../src/pdfs.jl")
-# ## reload("../src/ice.jl")
-
-# #include("../src/DtProtos.jl")
-# #include("../src/ice.jl")
-
-
-# [close() for i = [1:10]]
-
-
-
+#void testCumulative()
+ipdf1 = readPdf("data/pdf1.dat")
+ipdf2 = readPdf("data/pdf2.dat")
+ipdf3 = readPdf("data/pdf3.dat")
+ipdf4 = readPdf("data/pdf4.dat")
+ipdf5 = readPdf("data/pdf5.dat")
+ifs = open("data/cumulativetest.dat", "r")
+for i = [1:50]
+    x, y1, y2, y3, y4, y5 = float64(split(readline(ifs)))
+    y = ice.cdf(ipdf1, x)
+    #println(i, " ", x, " ", y1, " ", y)
+    @test abs(y-y1) < 1e-4
+    y = ice.cdf(ipdf2, x)
+    #println(i, " ", x, " ", y2, " ", y)
+    @test abs(y-y2) < 1e-4
+    y = ice.cdf(ipdf3, x)
+    #println(i, " ", x, " ", y3, " ", y)
+    @test abs(y-y3) < 1e-4
+    y = ice.cdf(ipdf4, x)
+    #println(i, " ", x, " ", y4, " ", y)
+    @test abs(y-y4) < 1e-4
+    y = ice.cdf(ipdf5, x)
+    #println(i, " ", x, " ", y5, " ", y)
+    @test abs(y-y5) < 1e-4
+end
 
 # lb, ub = -7.0, 7.0
 # lb, ub = -70.0, 70.0
@@ -122,46 +143,46 @@ end
 # ## draw()
 # ## show()
 
-##########################
-# Optimised controlpoints (fromPdfScale)
-##########################
+# ##########################
+# # Optimised controlpoints (fromPdfScale)
+# ##########################
 
-#cps = [lb+0.02:0.5:ub-0.01]
-#nice = fromPdfControlPoints(n, cps, false, false)
-println("baz")
-p1 = GaussianPdf( 20.0, 8.0, 1.0)
-## 14.6041 25.3959 
-## -3.22585 -3.22585 
-## 0.227468 
-## 1 1
-## 20
-## 64
-p = SimplePdf[]
-push!(p,p1);
-n = Pdf(p)
-nice = fromPdfScale(n, 15, 0.001) #
-info("controlPoints     : ", join(nice.controlPoints, " "))
-info("logarithmOfDensity: ", join(nice.logarithmOfDensity, " "))
-info("curvatures        : ", join(nice.curvatures, " "))
-info("left, right       : $(nice.hasLeftTail), $(nice.hasRightTail)")
-info("n                 : $(length(nice.controlPoints))")
-# 14.6041 25.3959 
-# -3.22585 -3.22585 
-# 0.227468 
-# 1 1
-# 20
-# 64
+# #cps = [lb+0.02:0.5:ub-0.01]
+# #nice = fromPdfControlPoints(n, cps, false, false)
+# println("baz")
+# p1 = GaussianPdf( 20.0, 8.0, 1.0)
+# ## 14.6041 25.3959 
+# ## -3.22585 -3.22585 
+# ## 0.227468 
+# ## 1 1
+# ## 20
+# ## 64
+# p = SimplePdf[]
+# push!(p,p1);
+# n = Pdf(p)
+# nice = fromPdfScale(n, 15, 0.001) #
+# info("controlPoints     : ", join(nice.controlPoints, " "))
+# info("logarithmOfDensity: ", join(nice.logarithmOfDensity, " "))
+# info("curvatures        : ", join(nice.curvatures, " "))
+# info("left, right       : $(nice.hasLeftTail), $(nice.hasRightTail)")
+# info("n                 : $(length(nice.controlPoints))")
+# # 14.6041 25.3959 
+# # -3.22585 -3.22585 
+# # 0.227468 
+# # 1 1
+# # 20
+# # 64
 
-figure()
-x = [0.0:60.0]
-fx = [pdf(n,xi) for xi in x]
-plot(x,fx,"o-")
+# figure()
+# x = [0.0:60.0]
+# fx = [pdf(n,xi) for xi in x]
+# plot(x,fx,"o-")
 
-fx = [pdf(n,xi) for xi in nice.controlPoints]
-plot(nice.controlPoints, fx, "o-")
+# fx = [pdf(n,xi) for xi in nice.controlPoints]
+# plot(nice.controlPoints, fx, "o-")
 
-figure()
-plot(nice.controlPoints, "o-")
+# figure()
+# plot(nice.controlPoints, "o-")
 
 
 
