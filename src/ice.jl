@@ -35,6 +35,29 @@ function pdf(icepdf::IcePdf, z::Number)
     return exp(a+b*localZ+icepdf.curvatures[i]*(1+localZ)*(1-localZ))
 end
 
+
+function quantile(icepdf::IcePdf, z::Number)
+    # // For the moment, this uses bisection, for speed, replace with
+    # // Brent's Method as is used in PDF.
+    # assertNonEmpty();
+    lower = icepdf.controlPoints[1]
+    upper = icepdf.controlPoints[end]
+    while (cdf(icepdf, lower) > z) 
+        lower = 2*lower-upper
+    end
+    while (cdf(icepdf, upper) < z)
+        upper = 2*upper-lower
+    end
+    for i = [1:32-1] #for (int i=0;i<32;++i) {
+        if (cdf(icepdf, (lower+upper)/2.) > z)
+            upper = (lower+upper)/2.
+        else
+            lower = (lower+upper)/2.
+        end
+    end
+    return (lower+upper)/2.
+end
+    
 function segment(icepdf::IcePdf, z::Number)
     debug("== Ice.segment(icepdf::IcePdf, z::Number)")
     #assertNonEmpty();

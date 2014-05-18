@@ -114,6 +114,34 @@ for i = [1:50]
     @test abs(y-y5) < 1e-4
 end
 
+#void testInverseCumulative()
+ 
+ipdf1 = readPdf("data/pdf1.dat")
+ipdf2 = readPdf("data/pdf2.dat")
+ipdf3 = readPdf("data/pdf3.dat")
+ipdf4 = readPdf("data/pdf4.dat")
+ipdf5 = readPdf("data/pdf5.dat")
+ifs = open("data/percentiletest.dat", "r")
+for i = [1:50]
+    x, y1, y2, y3, y4, y5 = float64(split(readline(ifs)))
+    y = ice.quantile(ipdf1, x)
+    #println(x, " ", y1, " ",  " ", y )
+    @test abs(y-y1) < 1e-3
+    y = ice.quantile(ipdf2, x)
+    #println(x, " ", y2, " ",  " ", y )
+    @test abs(y-y2) < 1e-3
+    y = ice.quantile(ipdf3, x)
+    #println(x, " ", y3, " ",  " ", y )
+    @test abs(y-y3) < 1e-3
+    y = ice.quantile(ipdf4, x)
+    #println(x, " ", y4, " ",  " ", y )
+    @test abs(y-y4) < 1e-3
+    y = ice.quantile(ipdf5, x)
+    #println(x, " ", y5, " ",  " ", y )
+    @test abs(y-y5) < 1e-3
+end
+
+
 # lb, ub = -7.0, 7.0
 # lb, ub = -70.0, 70.0
 # lb, ub = -4.0, 8.0
