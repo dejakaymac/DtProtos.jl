@@ -1,4 +1,4 @@
-module pdfs
+module Pdfs
 
 # package code goes here
 using PyPlot
@@ -148,31 +148,16 @@ function quantile(dist::GaussianPdf, probability::Number)
 function quantile(dist::Pdf, probability::Number)
     # find x (or fx)for which F(x) = prob using bisection method
     tol = 0.001
-    
-    # Choose endpoints
-    # # automatic ... 
-    # a = 0 #-100
-    # b = 0 #100 
-    # for cmp in dist.components
-    #     a = min(a, quantile(cmp, tol))
-    #     b = max(b, quantile(cmp, 1-tol))
-    #     #println(a, " ", b)
-    # end
-    # # if probability < cdf(dist, a) || probability > cdf(dist, b)
-    # #     do something
-    # # end
-    # err("Weird behaviour ... everything still ok when probability lies outside [a,b]")
-    # dx = b - a
-    # #println(a, " ", b)
-    # a = a - dx
-    # b = b + dx
-    # debug("a = $a, b = $b")
-    # Choose endpoints
-    # hardcoded
-    a = -100.0
-    b = 100.0
-
-    #
+    #a = cdf(dist, tol)
+    #b = cdf(dist, 1.0-tol)
+    a = cdf(dist, 0.5)
+    b = cdf(dist, 0.5)
+    for cmp in dist.components
+        a = min(a, quantile(cmp, tol/2))
+        b = max(b, quantile(cmp, 1-tol/2))
+        #a = min(a, quantile(cmp, 0.0))
+        #b = max(b, quantile(cmp, 1.0))
+    end
     nmax = 1000
     n = 0
     c = -99
@@ -180,8 +165,8 @@ function quantile(dist::Pdf, probability::Number)
     while n <= nmax
         c = (a + b)/2
         pc = cdf(dist, c) - probability
-        if abs(pc) < tol
-            debug("cdf(c) - p = $(cdf(dist, c)) - $probability")
+        if abs(pc) <= tol
+            info("cdf(c) - p = $(cdf(dist, c)) - $probability")
             break #return c
         end
         n += 1
@@ -202,26 +187,6 @@ function quantile(dist::Pdf, probability::Number)
     return c #,f
     #return pdf(dist, c)
 end
-
-# function quantile(dist::Pdf)
-#     #
-#     lp = 0.05 # lower probability 
-#     rp = 1 - lp
-#     l = 0
-#     r = 0
-#     for cmp in dist.components
-#         l = min(l, quantile(cmp, lp))
-#         r = max(r, quantile(cmp, rp))
-#         println("l $lp ", quantile(cmp, lp))
-#         println("r $rp ", quantile(cmp, rp))
-#         println(l, " ", r)
-#     end
-#     dx = (r-l) / 100
-#     x = [l:dx:r]
-#     #
-#     #f = [pdf(dist, xi) for xi=x]
-#     return x #,f
-# end
 
 
 end # module

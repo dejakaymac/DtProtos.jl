@@ -1,9 +1,6 @@
 import Base.Test.@test
 using PyPlot
-using DtProtos.pdfs
-include("../src/pdfs.jl")
-
-
+using DtProtos.Pdfs
     
 # SimplePdf
 n = GaussianPdf(0,1,1)
@@ -51,29 +48,10 @@ plot(x,invFp,"o")
 
 # quantile - Pdf
 figure()
+p = SimplePdf[]
 p1 = GaussianPdf( -3.0, 0.5, 1.0)
 p2 = GaussianPdf( 0.0, 1.0, 1.0)
 p3 = GaussianPdf( 7.0, 1.5, 1.0)
-
-p = SimplePdf[]
-push!(p,p1)
-push!(p,p2)
-push!(p,p3)
-
-n = Pdf(p)
-x = [-10:0.05:10]
-fx = [pdf(n,xi) for xi in x]
-Fx = [cdf(n,xi) for xi in x]# prob
-#invFp = [quantile(n, Fxi) for Fxi in Fx]
-invFp = [pdf(n, quantile(n, Fxi)) for Fxi in Fx]
-#plot(x,fx)
-plot(x,Fx)
-plot(x,invFp,"o")
-#invFp = quantile(n)
-#plot(invFp[1],invFp[2],"o")
-
-figure()
-p = SimplePdf[]
 p4 = GaussianPdf( 7.0, 1.5, 5.0)
 push!(p,p1)
 push!(p,p2)
@@ -91,28 +69,28 @@ plot(x,Fx)
 plot(x,invFp,"s")
 
 
-# quantile - Bounded Pdf
-figure()
-lb, ub = -4.0, 8.0
-dx = 0.05
-p1 = BoundedGaussianPdf(-3.0, 0.5, 1.0, lb, ub)
-p2 = BoundedGaussianPdf( 0.0, 1.0, 1.0, lb, ub)
-p3 = BoundedGaussianPdf( 7.0, 1.5, 1.0, lb, ub)
+## # quantile - Bounded Pdf
+## figure()
+## lb, ub = -4.0, 8.0
+## dx = 0.05
+## p1 = BoundedGaussianPdf(-3.0, 0.5, 1.0, lb, ub)
+## p2 = BoundedGaussianPdf( 0.0, 1.0, 1.0, lb, ub)
+## p3 = BoundedGaussianPdf( 7.0, 1.5, 1.0, lb, ub)
 
-p = SimplePdf[]
-push!(p,p1)
-push!(p,p2)
-push!(p,p3)
+## p = SimplePdf[]
+## push!(p,p1)
+## push!(p,p2)
+## push!(p,p3)
 
-n = Pdf(p)
-x = [lb+dx/1.5:dx:ub-dx/2]
-fx = [pdf(n,xi) for xi in x]
-Fx = [cdf(n,xi) for xi in x]# prob
-#invFp = [quantile(n, Fxi) for Fxi in Fx]
-invFp = [pdf(n, quantile(n, Fxi)) for Fxi in Fx]
-plot(x,fx)
-plot(x,Fx)
-plot(x,invFp,"o")
-#invFp = quantile(n)
-#plot(invFp[1],invFp[2],"o")
+## n = Pdf(p)
+## x = [lb+dx/1.5:dx:ub-dx/2]
+## fx = [pdf(n,xi) for xi in x]
+## Fx = [cdf(n,xi) for xi in x]# prob
+## #invFp = [quantile(n, Fxi) for Fxi in Fx]
+## invFp = [pdf(n, quantile(n, Fxi)) for Fxi in Fx]
+## plot(x,fx)
+## plot(x,Fx)
+## plot(x,invFp,"o")
+## #invFp = quantile(n)
+## #plot(invFp[1],invFp[2],"o")
 

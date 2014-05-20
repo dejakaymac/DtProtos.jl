@@ -4,7 +4,7 @@ module DtProtos
 using Distributions
 using Logging
 
-include("pdfs.jl")
+include("Pdfs.jl")
 include("Ice.jl")
 
 #export ...

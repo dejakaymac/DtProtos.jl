@@ -3,7 +3,7 @@ module Ice
 # package code goes here
 using PyPlot
 using Logging
-using DtProtos.pdfs
+using DtProtos.Pdfs
 
 export fromPdf, fromPdfControlPoints, fromPdfScale, fromBoundedPdfScale, IcePdf, pdf
 
