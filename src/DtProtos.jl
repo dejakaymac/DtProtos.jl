@@ -5,7 +5,7 @@ using Distributions
 using Logging
 
 include("pdfs.jl")
-include("ice.jl")
+include("Ice.jl")
 
 #export ...
 

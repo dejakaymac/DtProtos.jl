@@ -1,4 +1,4 @@
-module ice
+module Ice
 
 # package code goes here
 using PyPlot

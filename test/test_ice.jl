@@ -7,7 +7,7 @@ using PyPlot
 #Logging.configure(level=INFO)
 #Logging.configure(level=DEBUG)
 
-using DtProtos.ice
+using DtProtos.Ice
 using DtProtos.pdfs
 
 
@@ -34,7 +34,7 @@ for i = [1:140]
     if z == -1024
         z = -Inf
     end 
-    y1 = ice.I(z,a,b,c);
+    y1 = Ice.I(z,a,b,c);
     #println("$i $z, $a, $b, $c, $y, $y1")
     @test abs((y1-y)) <= 1e-4*abs(y)
 end
@@ -49,19 +49,19 @@ pdf5 = readPdf("data/pdf5.dat");
 ifs = open("data/densitytest.dat", "r");
 for i = [1:50]
     x, y1, y2, y3, y4, y5 = float64(split(readline(ifs)))
-    y = ice.pdf(pdf1, x);
+    y = Ice.pdf(pdf1, x);
     #//cout << x << ' ' << y1 << ' ' << y << endl;
     @test abs(y-y1) < 1e-8
-    y = ice.pdf(pdf2, x)
+    y = Ice.pdf(pdf2, x)
     #//cout << x << ' ' << y2 << ' ' << y << endl;
     @test abs(y-y2) < 1e-8
-    y = ice.pdf(pdf3, x)
+    y = Ice.pdf(pdf3, x)
     #//cout << x << ' ' << y3 << ' ' << y << endl;
     @test abs(y-y3) < 1e-8
-    y = ice.pdf(pdf4, x)
+    y = Ice.pdf(pdf4, x)
     #//cout << x << ' ' << y4 << ' ' << y << endl;
     @test abs(y-y4) < 1e-8
-    y = ice.pdf(pdf5, x)
+    y = Ice.pdf(pdf5, x)
     #//cout << x << ' ' << y5 << ' ' << y << endl;
     @test abs(y-y5) < 1e-8
 end
@@ -73,19 +73,19 @@ ipdf2 = readPdf("data/pdf2.dat")
 ipdf3 = readPdf("data/pdf3.dat")
 ipdf4 = readPdf("data/pdf4.dat")
 ipdf5 = readPdf("data/pdf5.dat")
-@test abs(ice.area(pdf1) - 1) < 1e-4
-@test abs(ice.area(pdf2) - 1) < 1e-4
-@test abs(ice.area(pdf3) - 1) < 1e-4
-@test abs(ice.area(pdf4) - 1) < 1e-4
-@test abs(ice.area(pdf5) - 1) < 1e-4
+@test abs(Ice.area(pdf1) - 1) < 1e-4
+@test abs(Ice.area(pdf2) - 1) < 1e-4
+@test abs(Ice.area(pdf3) - 1) < 1e-4
+@test abs(Ice.area(pdf4) - 1) < 1e-4
+@test abs(Ice.area(pdf5) - 1) < 1e-4
 
 #void testNormalise()
 x = [0., 1.3, 2.]
 y = [.3, .8, -.1]
 c = [1., 3.]
 ipdf = IcePdf(x, y, c, false, false)
-ice.normalise!(ipdf)
-@test abs(ice.area(ipdf) - 1) < 1e-4
+Ice.normalise!(ipdf)
+@test abs(Ice.area(ipdf) - 1) < 1e-4
             
 
 #void testCumulative()
@@ -97,19 +97,19 @@ ipdf5 = readPdf("data/pdf5.dat")
 ifs = open("data/cumulativetest.dat", "r")
 for i = [1:50]
     x, y1, y2, y3, y4, y5 = float64(split(readline(ifs)))
-    y = ice.cdf(ipdf1, x)
+    y = Ice.cdf(ipdf1, x)
     #println(i, " ", x, " ", y1, " ", y)
     @test abs(y-y1) < 1e-4
-    y = ice.cdf(ipdf2, x)
+    y = Ice.cdf(ipdf2, x)
     #println(i, " ", x, " ", y2, " ", y)
     @test abs(y-y2) < 1e-4
-    y = ice.cdf(ipdf3, x)
+    y = Ice.cdf(ipdf3, x)
     #println(i, " ", x, " ", y3, " ", y)
     @test abs(y-y3) < 1e-4
-    y = ice.cdf(ipdf4, x)
+    y = Ice.cdf(ipdf4, x)
     #println(i, " ", x, " ", y4, " ", y)
     @test abs(y-y4) < 1e-4
-    y = ice.cdf(ipdf5, x)
+    y = Ice.cdf(ipdf5, x)
     #println(i, " ", x, " ", y5, " ", y)
     @test abs(y-y5) < 1e-4
 end
@@ -124,19 +124,19 @@ ipdf5 = readPdf("data/pdf5.dat")
 ifs = open("data/percentiletest.dat", "r")
 for i = [1:50]
     x, y1, y2, y3, y4, y5 = float64(split(readline(ifs)))
-    y = ice.quantile(ipdf1, x)
+    y = Ice.quantile(ipdf1, x)
     #println(x, " ", y1, " ",  " ", y )
     @test abs(y-y1) < 1e-3
-    y = ice.quantile(ipdf2, x)
+    y = Ice.quantile(ipdf2, x)
     #println(x, " ", y2, " ",  " ", y )
     @test abs(y-y2) < 1e-3
-    y = ice.quantile(ipdf3, x)
+    y = Ice.quantile(ipdf3, x)
     #println(x, " ", y3, " ",  " ", y )
     @test abs(y-y3) < 1e-3
-    y = ice.quantile(ipdf4, x)
+    y = Ice.quantile(ipdf4, x)
     #println(x, " ", y4, " ",  " ", y )
     @test abs(y-y4) < 1e-3
-    y = ice.quantile(ipdf5, x)
+    y = Ice.quantile(ipdf5, x)
     #println(x, " ", y5, " ",  " ", y )
     @test abs(y-y5) < 1e-3
 end
