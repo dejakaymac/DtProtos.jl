@@ -8,7 +8,7 @@ using PyPlot
 #Logging.configure(level=DEBUG)
 
 using DtProtos.Ice
-using DtProtos.pdfs
+using DtProtos.Pdfs
 
 
 function readPdf(fname::String)
@@ -23,9 +23,10 @@ function readPdf(fname::String)
     ipdf = IcePdf(x,y,c,ltail,rtail);
 end
 
+testdir = splitdir(Base.source_path())[1]
 
 #function testI()
-ifs = open("data/IcePDFtestI.txt", "r");
+ifs = open(joinpath(testdir, "data/IcePDFtestI.txt"), "r");
 for i = [1:140]
     z, a, b, c, y = float64(split(readline(ifs)))
     if z == 1024
@@ -33,7 +34,7 @@ for i = [1:140]
     end
     if z == -1024
         z = -Inf
-    end 
+    end
     y1 = Ice.I(z,a,b,c);
     #println("$i $z, $a, $b, $c, $y, $y1")
     @test abs((y1-y)) <= 1e-4*abs(y)
@@ -41,12 +42,12 @@ end
 
 
 #void testEvaluate()
-pdf1 = readPdf("data/pdf1.dat");
-pdf2 = readPdf("data/pdf2.dat");
-pdf3 = readPdf("data/pdf3.dat");
-pdf4 = readPdf("data/pdf4.dat");
-pdf5 = readPdf("data/pdf5.dat");
-ifs = open("data/densitytest.dat", "r");
+pdf1 = readPdf(joinpath(testdir, "data/pdf1.dat"));
+pdf2 = readPdf(joinpath(testdir, "data/pdf2.dat"));
+pdf3 = readPdf(joinpath(testdir, "data/pdf3.dat"));
+pdf4 = readPdf(joinpath(testdir, "data/pdf4.dat"));
+pdf5 = readPdf(joinpath(testdir, "data/pdf5.dat"));
+ifs = open(joinpath(testdir, "data/densitytest.dat"), "r");
 for i = [1:50]
     x, y1, y2, y3, y4, y5 = float64(split(readline(ifs)))
     y = Ice.pdf(pdf1, x);
@@ -66,13 +67,12 @@ for i = [1:50]
     @test abs(y-y5) < 1e-8
 end
 
-
 #void testArea()
-ipdf1 = readPdf("data/pdf1.dat")
-ipdf2 = readPdf("data/pdf2.dat")
-ipdf3 = readPdf("data/pdf3.dat")
-ipdf4 = readPdf("data/pdf4.dat")
-ipdf5 = readPdf("data/pdf5.dat")
+ipdf1 = readPdf(joinpath(testdir, "data/pdf1.dat"))
+ipdf2 = readPdf(joinpath(testdir, "data/pdf2.dat"))
+ipdf3 = readPdf(joinpath(testdir, "data/pdf3.dat"))
+ipdf4 = readPdf(joinpath(testdir, "data/pdf4.dat"))
+ipdf5 = readPdf(joinpath(testdir, "data/pdf5.dat"))
 @test abs(Ice.area(pdf1) - 1) < 1e-4
 @test abs(Ice.area(pdf2) - 1) < 1e-4
 @test abs(Ice.area(pdf3) - 1) < 1e-4
@@ -89,12 +89,12 @@ Ice.normalise!(ipdf)
             
 
 #void testCumulative()
-ipdf1 = readPdf("data/pdf1.dat")
-ipdf2 = readPdf("data/pdf2.dat")
-ipdf3 = readPdf("data/pdf3.dat")
-ipdf4 = readPdf("data/pdf4.dat")
-ipdf5 = readPdf("data/pdf5.dat")
-ifs = open("data/cumulativetest.dat", "r")
+ipdf1 = readPdf(joinpath(testdir, "data/pdf1.dat"))
+ipdf2 = readPdf(joinpath(testdir, "data/pdf2.dat"))
+ipdf3 = readPdf(joinpath(testdir, "data/pdf3.dat"))
+ipdf4 = readPdf(joinpath(testdir, "data/pdf4.dat"))
+ipdf5 = readPdf(joinpath(testdir, "data/pdf5.dat"))
+ifs = open(joinpath(testdir, "data/cumulativetest.dat"), "r")
 for i = [1:50]
     x, y1, y2, y3, y4, y5 = float64(split(readline(ifs)))
     y = Ice.cdf(ipdf1, x)
@@ -116,12 +116,12 @@ end
 
 #void testInverseCumulative()
  
-ipdf1 = readPdf("data/pdf1.dat")
-ipdf2 = readPdf("data/pdf2.dat")
-ipdf3 = readPdf("data/pdf3.dat")
-ipdf4 = readPdf("data/pdf4.dat")
-ipdf5 = readPdf("data/pdf5.dat")
-ifs = open("data/percentiletest.dat", "r")
+ipdf1 = readPdf(joinpath(testdir, "data/pdf1.dat"))
+ipdf2 = readPdf(joinpath(testdir, "data/pdf2.dat"))
+ipdf3 = readPdf(joinpath(testdir, "data/pdf3.dat"))
+ipdf4 = readPdf(joinpath(testdir, "data/pdf4.dat"))
+ipdf5 = readPdf(joinpath(testdir, "data/pdf5.dat"))
+ifs = open(joinpath(testdir, "data/percentiletest.dat"), "r")
 for i = [1:50]
     x, y1, y2, y3, y4, y5 = float64(split(readline(ifs)))
     y = Ice.quantile(ipdf1, x)
