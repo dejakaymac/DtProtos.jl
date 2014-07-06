@@ -3,9 +3,6 @@
 using Base.Test
 #using Autoreload
 using PyPlot
-#using Logging
-#Logging.configure(level=INFO)
-#Logging.configure(level=DEBUG)
 
 using DtProtos.Ice
 using DtProtos.Pdfs
