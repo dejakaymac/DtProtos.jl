@@ -6,7 +6,7 @@ using Logging
 
 include("Pdfs.jl")
 include("Ice.jl")
-include("MaxEntropy.jl")
+#include("MaxEntropy.jl")
 
 #export ...
 
